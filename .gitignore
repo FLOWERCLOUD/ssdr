@@ -26,3 +26,14 @@
 *.exe
 *.out
 *.app
+eigen-3-1-4
+*.opensdf
+*.ipch
+x64
+*.ipd
+*.unsuccessfulbuild
+*.tlog
+*.lastbuild
+*.sdf
+*.suo
+*.user

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <vector>
 #include <DirectXMath.h>
@@ -6,43 +6,43 @@
 
 namespace SSDR
 {
-    // “ü—Íƒf[ƒ^\‘¢‘Ì
+    // Input data structure
     struct Input
     {
-        //! ’¸“_”
+        //Number of vertices
         int numVertices;
-        //! —á¦ƒf[ƒ^”
+        //Number of example data
         int numExamples;
-        //! ƒoƒCƒ“ƒh’¸“_À•Wi’¸“_”j
+        //! Bound vertex coordinates (number of vertices)
         std::vector<DirectX::XMFLOAT3A> bindModel;
-        //! —á¦Œ`ó’¸“_À•W (—á¦ƒf[ƒ^” x ’¸“_”j
+        //! Exemplary shape vertex coordinates (number of example data x number of vertices)
         std::vector<DirectX::XMFLOAT3A> sample;
 
         Input() : numVertices(0), numExamples(0) {}
         ~Input() {}
     };
 
-    // o—Íƒf[ƒ^\‘¢‘Ì
+    // output data structure
     struct Output
     {
-        //! ƒ{[ƒ“”
+        //Â Number of bones
         int numBones;
-        //! ƒXƒLƒjƒ“ƒOƒEƒFƒCƒgi’¸“_” x ƒCƒ“ƒfƒNƒX”j
+        //! Skinning weight (number of vertices x index number)
         std::vector<float> weight;
-        //! ƒCƒ“ƒfƒNƒXi’¸“_” x ƒCƒ“ƒfƒNƒX”j
+        //! Index (number of vertices x number of indexes)
         std::vector<int> index;
-        //! ƒXƒLƒjƒ“ƒOs—ñi—á¦ƒf[ƒ^” x œ”j
+        //! Skinning matrix (number of example data x number of bones)
         std::vector<RigidTransform> boneTrans;
     };
 
-    // ŒvZƒpƒ‰ƒ[ƒ^\‘¢‘Ì
+//calculation parameter structure
     struct Parameter
     {
-        //! Å¬ƒ{[ƒ“”
+		//Minimum bone count
         int numMinBones;
-        //! ’¸“_–ˆ‚ÉƒoƒCƒ“ƒh‚³‚ê‚éÅ‘åƒ{[ƒ“”
+        // Maximum number of bones bound per vertex
         int numIndices;
-        //! Å‘å”½•œ‰ñ”
+		// Maximum number of iterations
         int numMaxIterations;
     };
 

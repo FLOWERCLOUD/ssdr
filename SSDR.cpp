@@ -168,11 +168,11 @@ void UpdateWeightMap(Output& output, const Input& input, const Parameter& param)
     const int numBones = output.numBones;
     const int numIndices = param.numIndices;
 
-    // partition of unity制約 : cem^T xv + cev = 0
+    // partition of unity constraint : cem^T xv + cev = 0
     MatrixXd cem = MatrixXd::Zero(1, numBones);
     MatrixXd scem = MatrixXd::Zero(1, numIndices);
     VectorXd cev = VectorXd::Zero(1);
-    // 非負制約 : cim^T xv + civ >= 0
+    //nonnegativity constraint : cim^T xv + civ >= 0
     MatrixXd cim = MatrixXd::Zero(numBones, numBones);
     MatrixXd scim = MatrixXd::Zero(numIndices, numIndices);
     VectorXd civ = VectorXd::Zero(numBones);
@@ -204,7 +204,7 @@ void UpdateWeightMap(Output& output, const Input& input, const Parameter& param)
     const int numIndices = param.numIndices;
     const int numBones = output.numBones;
 
-    // 総和制約 : cem * xv + cev = 0
+    // Sum constraint : cem * xv + cev = 0
     MatrixXd cem = MatrixXd::Zero(1, numBones);
     MatrixXd scem = MatrixXd::Zero(1, numIndices);
     VectorXd cev = VectorXd::Zero(1);
@@ -213,7 +213,7 @@ void UpdateWeightMap(Output& output, const Input& input, const Parameter& param)
         cem(0, b) = 1.0;
     }
     cev(0) = -1.0;
-    // 非負制約 : cim * xv + civ >= 0
+    //Nonnegativity constraint : cim * xv + civ >= 0
     MatrixXd cim = MatrixXd::Zero(numBones, numBones);
     MatrixXd scim = MatrixXd::Zero(numIndices, numIndices);
     VectorXd civ = VectorXd::Zero(numBones);
@@ -324,12 +324,12 @@ void UpdateWeightMap(Output& output, const Input& input, const Parameter& param)
 }
 #endif
 
-// リストxxx.13：Hornの点群位置合わせアルゴリズム
+// List xxx.13: Horn point cloud alignment algorithm
 RigidTransform CalcPointsAlignment(size_t numPoints, std::vector<XMFLOAT3A>::const_iterator ps, std::vector<XMFLOAT3A>::const_iterator pd)
 {
     RigidTransform transform;
 
-    // それぞれの点群の重心座標の計算
+    // Calculate the barycentric coordinates of each point group
     XMVECTOR cs = XMVectorZero(), cd = XMVectorZero();
     std::vector<XMFLOAT3A>::const_iterator sit = ps;
     std::vector<XMFLOAT3A>::const_iterator dit = pd;
@@ -341,14 +341,14 @@ RigidTransform CalcPointsAlignment(size_t numPoints, std::vector<XMFLOAT3A>::con
     cs /= numPoints;
     cd /= numPoints;
 
-    // 回転の推定ができない or 回転を推定しない場合は平行移動成分のみ戻す
+    // If rotation can not be estimated or if rotation is not estimated, only parallel movement components are returned
     if (numPoints < 3)
     {
         XMStoreFloat3A(&transform.Translation(), cd - cs);
         return transform;
     }
 
-    // モーメント行列の計算
+    // Calculate the moment matrix
     Matrix<double, 4, 4> moment;
     double sxx = 0, sxy = 0, sxz = 0, syx = 0, syy = 0, syz = 0, szx = 0, szy = 0, szz = 0;
     sit = ps;
@@ -378,7 +378,7 @@ RigidTransform CalcPointsAlignment(size_t numPoints, std::vector<XMFLOAT3A>::con
 
     if (moment.norm() > 0)
     {
-        // 符号付き最大固有値に対応する固有ベクトルを取得
+        // Get the eigenvector corresponding to signed maximum eigenvalue
         EigenSolver<Matrix<double, 4, 4>> es(moment);
         int maxi = 0;
         for (int i = 1; i < 4; ++i)
@@ -395,14 +395,14 @@ RigidTransform CalcPointsAlignment(size_t numPoints, std::vector<XMFLOAT3A>::con
             static_cast<float>(es.eigenvectors()(0, maxi).real()));
     }
 
-    // 平行移動成分
+    // translation component
     //
     XMVECTOR cs0 = transform.TransformCoord(cs);
     XMStoreFloat3A(&transform.Translation(), cd - cs0);
     return transform;
 }
 
-// 式xxx.9：\tilde{q}_{j,n}
+// Expression xxx.9: \ tilde {q} _ {j, n}
 void ComputeExamplePoints(std::vector<XMFLOAT3A>& example, int sid, int bone, const Output& output, const Input& input, const Parameter& param)
 {
     const int numVertices = input.numVertices;
@@ -430,7 +430,7 @@ void SubtractCentroid(std::vector<XMFLOAT3A>& model, std::vector<XMFLOAT3A>& exa
 {
     const int numVertices = input.numVertices;
 
-    // 式xxx.10：\bar{p}_n，\bar{q}_{j,n}
+// Expression xxx.10: \ bar {p} _n, \ bar {q} _ {j, n}
     double wsqsum = 0;
     XMVECTOR dmodel = XMVectorZero();
     XMVECTOR dexample = XMVectorZero();
@@ -448,10 +448,10 @@ void SubtractCentroid(std::vector<XMFLOAT3A>& model, std::vector<XMFLOAT3A>& exa
 
     for (int v = 0; v < numVertices; ++v)
     {
-        // 式xxx.11：w_{j,c} p_j
+        // Expression xxx.11: w_ {j, c} p_j
         XMVECTOR d = XMLoadFloat3A(&input.bindModel[v]) - XMLoadFloat3A(&corModel);
         XMStoreFloat3A(&model[v], static_cast<float>(weight[v]) * d);
-        // 式xxx.11：q_{j,n}
+        // Expression xxx.11: q_ {j, n}
         d = XMLoadFloat3A(&example[v]) - static_cast<float>(weight[v]) * XMLoadFloat3A(&corExample);
         XMStoreFloat3A(&example[v], d);
     }
@@ -480,16 +480,16 @@ public:
         std::vector<XMFLOAT3A> model(input->numVertices), example(input->numVertices);
         for (int s = range.begin(); s != range.end(); ++s)
         {
-            // 式xxx.9：\tilde{q}_{j,n}
+            // Expression xxx.9: \ tilde {q} _ {j, n}
             ComputeExamplePoints(example, s, bone, *output, *input, *param);
 
-            // 式xxx.10，xxx.11
+            // Expressions xxx.10, xxx.11
             XMFLOAT3A corModel(0, 0, 0), corExample(0, 0, 0);
             SubtractCentroid(model, example, corModel, corExample, *weight, *output, *input);
 
-            // 式xxx.12の解
+            // the solution of the expression xxx.12
             RigidTransform transform = CalcPointsAlignment(model.size(), model.begin(), example.begin());
-            // 式xxx.13
+            // Expression xxx.13
             XMVECTOR d = XMLoadFloat3A(&corExample) - transform.TransformCoord(XMLoadFloat3A(&corModel));
             XMStoreFloat3A(&transform.Translation(), d + XMLoadFloat3A(&transform.Translation()));
             output->boneTrans[s * output->numBones + bone] = transform;
@@ -551,14 +551,14 @@ void UpdateBoneTransform(Output& output, const Input& input, const Parameter& pa
 
         for (int s = 0; s < numExamples; ++s)
         {
-            // 式xxx.9：\tilde{q}_{j,n}
+            // Expression xxx.9: \ tilde {q} _ {j, n}
             ComputeExamplePoints(example, s, bone, output, input, param);
-            // 式xxx.10，xxx.11
+             // Expressions xxx.10, xxx.11
             XMFLOAT3A corModel(0, 0, 0), corExample(0, 0, 0);
             SubtractCentroid(model, example, corModel, corExample, weight, output, input);
-            // 式xxx.12の解
+             // the solution of the expression xxx.12
             RigidTransform transform = CalcPointsAlignment(model.size(), model.begin(), example.begin());
-            // 式xxx.13
+             // Expression xxx.13
             XMVECTOR d = XMLoadFloat3A(&corExample) - transform.TransformCoord(XMLoadFloat3A(&corModel));
             XMStoreFloat3A(&transform.Translation(), d + XMLoadFloat3A(&transform.Translation()));
             output.boneTrans[s * output.numBones + bone] = transform;
@@ -645,7 +645,7 @@ int BindVertexToBone(Output& output, std::vector<RigidTransform>& boneTrans, con
         vertexError[v] = minErr;
     }
 
-    // 空クラスタの除去
+    // Removal of empty cluster
     std::vector<int>::iterator smallestBoneSize = std::min_element(numBoneVertices.begin(), numBoneVertices.end());
     while (*smallestBoneSize <= 0)
     {
@@ -750,13 +750,13 @@ double Decompose(Output& output, const Input& input, const Parameter& param)
     output.index.assign(numVertices * numIndices, 0);
     output.weight.assign(numVertices * numIndices, 0.0f);
 
-    // クラスタ分割期待値最大化法を用いた初期バインディング
+    //Initial binding using cluster partition expectation maximization method
     output.numBones = ClusterInitialBones(output, input, param);
-    // 初期ボーントランスフォーム
+    // Initial bone transform
     output.boneTrans.assign(numExamples * output.numBones, RigidTransform::Identity());
     UpdateBoneTransform(output.boneTrans, output.numBones, output, input, param);
 
-    // BCDアルゴリズムによるスキニングウェイトとボーン姿勢の交互最適化
+     //Alternate optimization of skinning weight and bone attitude by BCD algorithm
     for (int loop = 0; loop < param.numMaxIterations; ++loop)
     {
         UpdateWeightMap(output, input, param);

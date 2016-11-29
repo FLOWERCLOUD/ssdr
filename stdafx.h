@@ -1,7 +1,6 @@
-// stdafx.h : 標準のシステム インクルード ファイルのインクルード ファイル、または
-// 参照回数が多く、かつあまり変更されない、プロジェクト専用のインクルード ファイル
-// を記述します。
-//
+// stdafx.h: Include file of standard system include file, or
+// Include file dedicated to the project that has many reference times and is not changed much
+
 
 #pragma once
 
