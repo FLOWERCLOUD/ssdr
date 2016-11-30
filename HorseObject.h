@@ -8,8 +8,10 @@
 class HorseObject : public Object
 {
 public:
-    using SharedPtr = std::shared_ptr<HorseObject>;
-    using UniquePtr = std::unique_ptr<HorseObject>;
+//    using SharedPtr = std::shared_ptr<HorseObject>;
+//    using UniquePtr = std::unique_ptr<HorseObject>;
+	typedef std::shared_ptr<HorseObject> SharedPtr;
+	typedef std::unique_ptr<HorseObject> UniquePt;
 
 protected:
     struct ConstantBufferPerFrame

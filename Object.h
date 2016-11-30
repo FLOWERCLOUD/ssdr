@@ -10,9 +10,12 @@
 struct Object
 {
 public:
-    using SharedPtr = std::shared_ptr<Object>;
-    using WeakPtr = std::weak_ptr<Object>;
-    using UniquePtr = std::unique_ptr<Object>;
+    //using SharedPtr = std::shared_ptr<Object>;
+    //using WeakPtr = std::weak_ptr<Object>;
+    //using UniquePtr = std::unique_ptr<Object>;
+	typedef std::shared_ptr<Object> SharedPtr;
+	typedef std::weak_ptr<Object> WeakPtr;
+	typedef std::unique_ptr<Object> UniquePtr;
 
 protected:
     WeakPtr self;
